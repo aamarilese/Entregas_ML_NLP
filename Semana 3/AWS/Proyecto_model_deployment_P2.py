@@ -6,28 +6,22 @@ import sys
 import os
 
 
-def predict_pupularity(x):
+def predict_popularity(X_test):
 
-    clf = joblib.load(os.path.dirname(__file__) + '/phishing_clf.pkl')
+    stacking = joblib.load(os.path.dirname(__file__) +
+                           '/popularity_stacking.pkl')
 
-    url_ = pd.DataFrame([url], columns=['url'])
+    X = pd.DataFrame([X_test])
 
-    # Create features
-    keywords = ['https', 'login', '.php', '.html', '@', 'sign']
-    for keyword in keywords:
-        url_['keyword_' + keyword] = url_.url.str.contains(keyword).astype(int)
+    drop_cols = ['track_id', 'track_name',
+                 'artists', 'album_name', 'track_genre']
 
-    url_['lenght'] = url_.url.str.len() - 2
-    domain = url_.url.str.split('/', expand=True).iloc[:, 2]
-    url_['lenght_domain'] = domain.str.len()
-    url_['isIP'] = (url_.url.str.replace('.', '')
-                    * 1).str.isnumeric().astype(int)
-    url_['count_com'] = url_.url.str.count('com')
+    X = X.drop(columns=drop_cols)
 
     # Make prediction
-    p1 = clf.predict_proba(url_.drop('url', axis=1))[0, 1]
+    prediction = stacking.predict(X)
 
-    return p1
+    return prediction
 
 
 if __name__ == "__main__":
@@ -39,7 +33,7 @@ if __name__ == "__main__":
 
         url = sys.argv[1]
 
-        p1 = predict_proba(url)
+        popularity_score = predict_popularity(url)
 
         print(url)
-        print('Probability of Phishing: ', p1)
+        print('Popularidad: ', popularity_score)
