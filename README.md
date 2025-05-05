@@ -8,7 +8,9 @@ Este repositorio contiene las entregas de talleres, proyectos grupales y otras a
 - `/Semana 2/`: Contiene la entrega de la semana 2 del curso.
 - `/Semana 3/`: Contiene la entrega de la semana 3 del curso.
 - `/Semana 4/`: Contiene la entrega de la semana 4 del curso.
-
+- `/Semana 5/`: Contiene la entrega de la semana 5 del curso.
+- `/Semana 6/`: Contiene la entrega de la semana 6 del curso.
+  
 Cada carpeta incluye:
 - Un archivo `.ipynb` con el desarrollo del taller o proyecto.
 - Un archivo `README.md` adicional en aquellos casos donde se requiere contexto adicional o instrucciones.
