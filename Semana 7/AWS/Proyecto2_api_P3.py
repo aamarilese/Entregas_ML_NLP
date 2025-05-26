@@ -39,34 +39,43 @@ parser.add_argument('plot', type=str, required=True,
 #     'result': fields.String,
 # })
 
-resource_fields = api.model('PredictionOutput', {
-    'popularity': fields.Float(description='Popularidad predicha (0 a 100)')
+resource_fields = api.model('GenreProbabilities', {
+    'genres': fields.Raw(
+        description='Dictionary of predicted genres and their probabilities'
+    )
 })
 
 
 @ns.route('/')
-class PopularityPredictor(Resource):
-    # @ns.expect(input_model)
-    # @ns.marshal_with(resource_fields)
+class GenreClassifier(Resource):
     @ns.expect(parser)
     @ns.marshal_with(resource_fields)
     def get(self):
-        # data = request.get_json()
         args = parser.parse_args()
-        print(args)
-        args = dict(args)
-        result = predict_genre(args)
-        print(result)
-        print(type(result))
+        plot = args.get('plot')
 
-        if isinstance(result, np.ndarray):
-            result = result.item()
+        if not plot:
+            api.abort(400, "Missing 'plot' parameter.")
 
-        print(result)
+        try:
+            # Ejecutar predicción
+            df_probs = predict_genre(plot)
 
-        return {
-            "popularity": result
-        }, 200
+            # Ordenar por probabilidad
+            sorted_genres = df_probs.T.sort_values(by=0, ascending=False)
+            sorted_genres.columns = ['probability']
+
+            # Filtrar si se desea (umbral)
+            threshold = 0.1
+            filtered = sorted_genres[sorted_genres['probability'] > threshold]
+
+            # Convertir a diccionario
+            genre_dict = filtered['probability'].round(3).to_dict()
+
+            return {'genres': genre_dict}, 200
+
+        except Exception as e:
+            api.abort(500, f"Prediction error: {str(e)}")
 
 
 if __name__ == '__main__':
